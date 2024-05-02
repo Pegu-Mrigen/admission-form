@@ -41,29 +41,20 @@ export const studentRegister = catchAsyncErrors(async (req, res, next) => {
   generateToken(student, "Student Registered!", 200, res);
 });
 
-export const login = catchAsyncErrors(async (req, res, next) => {
+export const login = catchAsyncErrors(async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) {
-    return next(new ErrorHandler("Please Fill Full Form!", 400));
-  }
-
-  const student = await Student.findOne({ email });
-
-  // if (!student) {
-  //   return next(new ErrorHandler("Invalid Email!", 400));
+  // if (!email || !password) {
+  //   return next(new ErrorHandler("Please Fill Full Form!", 400));
   // }
 
-  //const isPasswordMatch = await student.comparePassword(password); //"comparePassword" METHOD IS CREATED INSIDE STUDENTSCHEMA
-  //const isPasswordMatch = await bcrypt.compare(student.password, 10, null, ()=>{})
-  if (student.password !== password) {
-    // return next(new ErrorHandler("Invalid  Password!", 400));
-    return res.status(400).json({
-      success: false,
-      message: "Invalid  Password!!",
-    });
-  }
+  const student = await Student.find({email}).select("+password");
 
-  generateToken(student, "Login Successfully!", 201, res);
+
+  if (student) {
+    res.json(student);
+  } else {
+    res.status(400).json("User or password incorrect!");
+  }
 });
 
 export const addNewAdmin = catchAsyncErrors(async (req, res, next) => {
